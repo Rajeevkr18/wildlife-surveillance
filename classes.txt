@@ -1,0 +1,9 @@
+elephant
+deer
+bear
+fox
+tiger
+leopard
+wolf
+zebra
+monkey

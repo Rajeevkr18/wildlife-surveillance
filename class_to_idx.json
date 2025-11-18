@@ -1,0 +1,12 @@
+{
+  "dog": 0,
+  "horse": 1,
+  "elephant": 2,
+  "butterfly": 3,
+  "hen": 4,
+  "cat": 5,
+  "cow": 6,
+  "sheep": 7,
+  "spider": 8,
+  "squirrel": 9
+}
