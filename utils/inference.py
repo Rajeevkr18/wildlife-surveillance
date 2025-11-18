@@ -1,42 +1,57 @@
+import sys
+import os
+
+# ==========================================================
+# FIX PATH FOR STREAMLIT CLOUD TO IMPORT preprocessing.py
+# ==========================================================
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
 import tensorflow as tf
 import numpy as np
 import cv2
-import os
 import json
 import gdown
-from utils.preprocessing import preprocess_image
+from preprocessing import preprocess_image    # <-- FIXED IMPORT
 
-# ---------------------------
-# Resolve absolute project path
-# ---------------------------
+
+# ==========================================================
+# BASE PROJECT PATH
+# ==========================================================
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-# ---------------------------
-# Google Drive model file ID
-# ---------------------------
+# Google Drive ID of your model
 MODEL_FILE_ID = "1tV1RDM4ZuxNmSHnxl_xWh3DMu6ZhHzRi"
 
-# Local path where model should be stored
+# Model storage path
 MODEL_PATH = os.path.join(BASE_DIR, "models", "animal_classifier.keras")
 
-# ---------------------------
-# Download model if NOT present
-# ---------------------------
+
+# ==========================================================
+# DOWNLOAD MODEL IF NOT PRESENT
+# ==========================================================
 if not os.path.exists(MODEL_PATH):
     print("Model not found. Downloading from Google Drive...")
     os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-    url = f"https://drive.google.com/uc?id={MODEL_FILE_ID}"
-    gdown.download(url, MODEL_PATH, quiet=False)
 
-# ---------------------------
-# Load model
-# ---------------------------
+    gdown.download(
+        f"https://drive.google.com/uc?id={MODEL_FILE_ID}",
+        MODEL_PATH,
+        quiet=False
+    )
+
+
+# ==========================================================
+# LOAD MODEL
+# ==========================================================
 animal_model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 print("Model loaded successfully!")
 
-# ---------------------------
-# Load class mapping
-# ---------------------------
+
+# ==========================================================
+# LOAD CLASS MAPPING (class_to_idx.json)
+# ==========================================================
 json_path = os.path.join(BASE_DIR, "class_to_idx.json")
 
 with open(json_path, "r") as f:
@@ -45,35 +60,33 @@ with open(json_path, "r") as f:
 idx_to_class = {int(v): k for k, v in class_map.items()}
 
 
-# ---------------------------------------------------
+# ==========================================================
 # ANIMAL PREDICTION
-# ---------------------------------------------------
+# ==========================================================
 def predict_animal(image):
     img = preprocess_image(image)
     preds = animal_model.predict(img)[0]
 
     idx = int(np.argmax(preds))
-    label = idx_to_class[idx]
+    label = idx_to_class[idx].lower()   # ALWAYS lower-case
     confidence = float(preds[idx])
 
-    # FIX: Return lowercase for Wikipedia lookup
-    return label.lower(), confidence
+    return label, confidence
 
 
-# ---------------------------------------------------
-# FIRE PREDICTION (DUMMY)
-# ---------------------------------------------------
+# ==========================================================
+# FIRE (DUMMY DETECTOR)
+# ==========================================================
 def predict_fire(image):
     return "No Fire", 0.98
 
 
-# ---------------------------------------------------
-# POACHING DETECTION (FIXED RECTANGLE)
-# ---------------------------------------------------
+# ==========================================================
+# POACHING DETECTION (RECTANGLE FIXED)
+# ==========================================================
 def detect_poaching(image):
     h, w, _ = image.shape
 
-    # FIXED OpenCV rectangle → MUST use tuple (w-50, h-50)
     det_img = cv2.rectangle(
         image.copy(),
         (50, 50),
