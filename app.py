@@ -1,8 +1,23 @@
+import sys
+import os
+
+# ================================================
+# FIX IMPORT PATH FOR STREAMLIT CLOUD
+# ================================================
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utils_dir = os.path.join(current_dir, "utils")
+
+if utils_dir not in sys.path:
+    sys.path.append(utils_dir)
+
+# ================================================
+# IMPORTS
+# ================================================
 import streamlit as st
 import numpy as np
 import cv2
 from PIL import Image
-from utils.inference import predict_animal, predict_fire, detect_poaching
+from inference import predict_animal, predict_fire, detect_poaching
 import base64
 import time
 
@@ -15,7 +30,7 @@ st.set_page_config(
 )
 
 # ================================================
-# PREMIUM UI THEME (Glass + Gradient)
+# PREMIUM UI THEME (Glassmorphism + Gradient)
 # ================================================
 st.markdown("""
     <style>
@@ -57,7 +72,7 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* BUTTON */
+    /* BUTTONS */
     .stButton>button {
         background: linear-gradient(135deg, #0ea5e9, #3b82f6);
         color: white;
@@ -103,7 +118,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
 # ================================================
 # HEADER
 # ================================================
@@ -122,7 +136,7 @@ mode = st.sidebar.radio(
 uploaded_file = st.sidebar.file_uploader("📤 Upload Image", type=["png", "jpg", "jpeg"])
 
 # ================================================
-# NON-WEBCAM MODES (Glass Card)
+# IMAGE-BASED MODES
 # ================================================
 if mode != "Live Webcam":
 
@@ -130,24 +144,26 @@ if mode != "Live Webcam":
 
     col1, col2 = st.columns([1, 1])
 
+    # LEFT PANEL — SHOW IMAGE
     with col1:
         if uploaded_file:
             pil_image = Image.open(uploaded_file).convert("RGB")
             image = np.array(pil_image)
             st.image(image, caption="📷 Uploaded Image", use_container_width=True)
         else:
-            st.warning("⬅ Please upload an image")
+            st.warning("⬅ Please upload an image.")
 
+    # RIGHT PANEL — ANALYSIS
     with col2:
         if uploaded_file and st.button("🚀 Run Analysis"):
-            with st.spinner("Processing..."):
+            with st.spinner("Processing... Please wait..."):
                 time.sleep(1)
 
                 tab1, tab2, tab3 = st.tabs(
                     ["🦌 Animal Classification", "🎯 Poaching Detection", "🔥 Fire Detection"]
                 )
 
-                # ----------------------- ANIMAL CLASSIFICATION ------------------------
+                # ANIMAL CLASSIFICATION
                 with tab1:
                     label, conf = predict_animal(image)
                     st.markdown(
@@ -156,7 +172,7 @@ if mode != "Live Webcam":
                     )
                     st.info(f"Confidence: {conf*100:.2f}%")
 
-                # ----------------------- POACHING DETECTION ------------------------
+                # POACHING DETECTION
                 with tab2:
                     result_img, boxes = detect_poaching(image)
                     st.image(result_img, use_container_width=True)
@@ -165,7 +181,7 @@ if mode != "Live Webcam":
                         unsafe_allow_html=True
                     )
 
-                # ----------------------- FIRE DETECTION ------------------------
+                # FIRE DETECTION
                 with tab3:
                     fire_label, fire_conf = predict_fire(image)
                     if "Fire" in fire_label:
@@ -206,7 +222,7 @@ if mode == "Live Webcam":
         while st.session_state.cam_active:
             ret, frame = cap.read()
             if not ret:
-                st.error("Could not read frame")
+                st.error("Could not read frame.")
                 break
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -217,8 +233,8 @@ if mode == "Live Webcam":
                 f"{label.title()} ({conf*100:.1f}%)",
                 (10, 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                1.1,
-                (56,189,248),
+                1.0,
+                (56, 189, 248),
                 2
             )
 
