@@ -35,13 +35,11 @@ st.set_page_config(
 st.markdown("""
     <style>
 
-    /* GLOBAL BACKGROUND */
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         color: #e2e8f0;
     }
 
-    /* GLASS CARD CONTAINER */
     .glass-card {
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(14px);
@@ -53,7 +51,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* HEADER TITLE */
     .main-title {
         text-align: center;
         font-size: 48px;
@@ -63,7 +60,6 @@ st.markdown("""
         margin-top: 10px;
     }
 
-    /* SUBTITLE */
     .sub-title {
         text-align: center;
         font-size: 20px;
@@ -72,7 +68,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* BUTTONS */
     .stButton>button {
         background: linear-gradient(135deg, #0ea5e9, #3b82f6);
         color: white;
@@ -88,7 +83,6 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(59,130,246,0.6);
     }
 
-    /* RESULT BOX */
     .result-box {
         background: rgba(59,130,246,0.15);
         padding: 15px;
@@ -100,7 +94,6 @@ st.markdown("""
         margin-top: 15px;
     }
 
-    /* TABS */
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.1);
         padding: 12px 20px;
@@ -136,7 +129,7 @@ mode = st.sidebar.radio(
 uploaded_file = st.sidebar.file_uploader("📤 Upload Image", type=["png", "jpg", "jpeg"])
 
 # ================================================
-# IMAGE-BASED MODES
+# IMAGE MODES
 # ================================================
 if mode != "Live Webcam":
 
@@ -144,7 +137,7 @@ if mode != "Live Webcam":
 
     col1, col2 = st.columns([1, 1])
 
-    # LEFT PANEL — SHOW IMAGE
+    # LEFT — IMAGE
     with col1:
         if uploaded_file:
             pil_image = Image.open(uploaded_file).convert("RGB")
@@ -153,7 +146,7 @@ if mode != "Live Webcam":
         else:
             st.warning("⬅ Please upload an image.")
 
-    # RIGHT PANEL — ANALYSIS
+    # RIGHT — ANALYSIS
     with col2:
         if uploaded_file and st.button("🚀 Run Analysis"):
             with st.spinner("Processing... Please wait..."):
@@ -172,7 +165,7 @@ if mode != "Live Webcam":
                     )
                     st.info(f"Confidence: {conf*100:.2f}%")
 
-                # POACHING DETECTION
+                # POACHING
                 with tab2:
                     result_img, boxes = detect_poaching(image)
                     st.image(result_img, use_container_width=True)
@@ -181,7 +174,7 @@ if mode != "Live Webcam":
                         unsafe_allow_html=True
                     )
 
-                # FIRE DETECTION
+                # FIRE
                 with tab3:
                     fire_label, fire_conf = predict_fire(image)
                     if "Fire" in fire_label:
@@ -216,7 +209,7 @@ if mode == "Live Webcam":
         cap = cv2.VideoCapture(0)
 
         if not cap.isOpened():
-            st.error("❌ Unable to access webcam")
+            st.error("❌ Unable to access webcam.")
             st.session_state.cam_active = False
 
         while st.session_state.cam_active:
