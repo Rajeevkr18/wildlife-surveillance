@@ -1,2 +1,11 @@
 [global]
-pythonVersion = "3.10"
+useDeprecatedRR = false
+
+[experimental]
+fastReruns = true
+
+[server]
+enableStaticServing = true
+
+[ui]
+use_container_width = true
