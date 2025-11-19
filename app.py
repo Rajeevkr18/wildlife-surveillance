@@ -18,7 +18,6 @@ import numpy as np
 import cv2
 from PIL import Image
 from inference import predict_animal, predict_fire, detect_poaching
-import base64
 import time
 
 # ================================================
@@ -30,27 +29,23 @@ st.set_page_config(
 )
 
 # ================================================
-# PREMIUM UI THEME (Glassmorphism + Gradient)
+# PREMIUM UI THEME
 # ================================================
 st.markdown("""
     <style>
-
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         color: #e2e8f0;
     }
-
     .glass-card {
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
         border-radius: 18px;
         padding: 25px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
         margin-bottom: 20px;
     }
-
     .main-title {
         text-align: center;
         font-size: 48px;
@@ -59,7 +54,6 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
         margin-top: 10px;
     }
-
     .sub-title {
         text-align: center;
         font-size: 20px;
@@ -67,7 +61,6 @@ st.markdown("""
         margin-top: -12px;
         margin-bottom: 20px;
     }
-
     .stButton>button {
         background: linear-gradient(135deg, #0ea5e9, #3b82f6);
         color: white;
@@ -82,7 +75,6 @@ st.markdown("""
         transform: scale(1.05);
         box-shadow: 0 0 15px rgba(59,130,246,0.6);
     }
-
     .result-box {
         background: rgba(59,130,246,0.15);
         padding: 15px;
@@ -93,21 +85,6 @@ st.markdown("""
         border: 1px solid rgba(59,130,246,0.4);
         margin-top: 15px;
     }
-
-    .stTabs [data-baseweb="tab"] {
-        background: rgba(255,255,255,0.1);
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-right: 10px;
-        color: #e2e8f0 !important;
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        transition: 0.2s;
-    }
-    .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255,255,255,0.25);
-    }
-
     </style>
 """, unsafe_allow_html=True)
 
@@ -137,7 +114,7 @@ if mode != "Live Webcam":
 
     col1, col2 = st.columns([1, 1])
 
-    # LEFT — IMAGE
+    # LEFT — IMAGE PREVIEW
     with col1:
         if uploaded_file:
             pil_image = Image.open(uploaded_file).convert("RGB")
@@ -165,7 +142,7 @@ if mode != "Live Webcam":
                     )
                     st.info(f"Confidence: {conf*100:.2f}%")
 
-                # POACHING
+                # POACHING DETECTION
                 with tab2:
                     result_img, boxes = detect_poaching(image)
                     st.image(result_img, use_container_width=True)
@@ -174,7 +151,7 @@ if mode != "Live Webcam":
                         unsafe_allow_html=True
                     )
 
-                # FIRE
+                # FIRE DETECTION
                 with tab3:
                     fire_label, fire_conf = predict_fire(image)
                     if "Fire" in fire_label:
@@ -194,7 +171,7 @@ if mode == "Live Webcam":
 
     start = st.button("▶ Start Webcam")
     stop = st.button("⏹ Stop Webcam")
-    FRAME_WINDOW = st.image([])
+    FRAME_WINDOW = st.image([], use_container_width=True)
 
     if "cam_active" not in st.session_state:
         st.session_state.cam_active = False
@@ -231,7 +208,7 @@ if mode == "Live Webcam":
                 2
             )
 
-            FRAME_WINDOW.image(rgb)
+            FRAME_WINDOW.image(rgb, use_container_width=True)
 
         cap.release()
 
